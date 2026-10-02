@@ -424,3 +424,36 @@ export function currentMinute(tz: string) {
 }
 
 export { zonedToUtc };
+
+/** Landing-page data. "Trending" is ranked by real bookings in the last 14 days — no fake popularity. */
+export async function getLandingData() {
+  const statuses = await publicStatuses();
+  const trendingRows = await db.execute<{ salon_id: string; n: number }>(sql`
+    select b.salon_id, count(*)::int as n from bookings b join salons s on s.id = b.salon_id
+    where b.created_at > now() - interval '14 days' and b.status not in ('FAILED','PAYMENT_PENDING','CANCELLED') and s.status in ${sql.raw(`(${statuses.map((x) => `'${x}'`).join(",")})`)}
+    group by 1 order by n desc limit 8`);
+  const trendingIds = trendingRows.rows.map((r) => r.salon_id);
+  const [categories, topRated, trending, offers] = await Promise.all([
+    listCategories(),
+    searchSalons({ sort: "rating", pageSize: 8 }),
+    trendingIds.length ? searchSalons({ ids: trendingIds, pageSize: 8 }) : Promise.resolve({ items: [] as SalonCard[] }),
+    db
+      .select({ id: coupons.id, code: coupons.code, title: coupons.title, description: coupons.description, validTo: coupons.validTo, kind: coupons.kind, salonName: salons.name, salonSlug: salons.slug, citySlug: salons.citySlug, brandColor: salons.brandColor, salonId: salons.id })
+      .from(coupons)
+      .innerJoin(salons, eq(salons.id, coupons.salonId))
+      .where(and(eq(coupons.active, true), lt(coupons.validFrom, new Date()), gt(coupons.validTo, new Date()), inArray(salons.status, [...statuses])))
+      .orderBy(desc(coupons.value))
+      .limit(12),
+  ]);
+  const order = new Map(trendingIds.map((id, i) => [id, i]));
+  return {
+    categories,
+    topRated: topRated.items,
+    trending: [...trending.items].sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)).map((s) => ({ ...s, recentBookings: trendingRows.rows.find((r) => r.salon_id === s.id)?.n ?? 0 })),
+    offers,
+  };
+}
+
+export async function getPlatformOffers() {
+  return db.query.coupons.findMany({ where: and(sql`${coupons.salonId} is null`, eq(coupons.active, true), gt(coupons.validTo, new Date())) });
+}
