@@ -1,0 +1,2 @@
+ALTER TABLE "notifications" ADD COLUMN "external_delivered_at" timestamp with time zone;--> statement-breakpoint
+CREATE INDEX "notifications_outbox_idx" ON "notifications" USING btree ("created_at") WHERE "notifications"."external_delivered_at" is null;
