@@ -185,6 +185,7 @@ export async function getResourceBoard(salonId: string) {
         startsAt: bookings.startsAt,
         endsAt: bookings.endsAt,
         occupiedUntil: bookingResources.endsAt,
+        paymentStatus: bookings.paymentStatus,
         lateMinutes: bookings.lateMinutes,
         estimatedStartAt: bookings.estimatedStartAt,
         overrideConflict: bookings.overrideConflict,
