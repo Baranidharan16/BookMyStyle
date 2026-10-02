@@ -15,7 +15,7 @@ export async function getPlatformStats() {
       (select count(*) from salons where status in ('PENDING','UNDER_REVIEW'))::int as pending_salons,
       (select count(*) from bookings where (starts_at at time zone 'Asia/Kolkata')::date = (now() at time zone 'Asia/Kolkata')::date and status in ('CONFIRMED','CHECKED_IN','WAITING','IN_SERVICE','COMPLETED'))::int as bookings_today,
       (select coalesce(sum(total),0) from bookings where status in ('CONFIRMED','CHECKED_IN','WAITING','IN_SERVICE','COMPLETED') and source = 'ONLINE' and payment_status in ('SUCCESSFUL','PARTIALLY_REFUNDED') and created_at > now() - interval '30 days')::bigint as gmv_30d,
-      (select coalesce(sum((b.total - b.tax) * coalesce(s.commission_percent, case s.plan when 'FREE' then ${cfg.planCommission.FREE} when 'PRO' then ${cfg.planCommission.PRO} else ${cfg.planCommission.PREMIUM} end) / 100.0),0)
+      (select coalesce(sum((b.total - b.tax) * coalesce(s.commission_percent, case s.plan when 'FREE' then ${cfg.planCommission.FREE}::real when 'PRO' then ${cfg.planCommission.PRO}::real else ${cfg.planCommission.PREMIUM}::real end) / 100.0),0)
          from bookings b join salons s on s.id = b.salon_id
          where b.source = 'ONLINE' and b.status in ('CONFIRMED','CHECKED_IN','WAITING','IN_SERVICE','COMPLETED') and b.payment_status in ('SUCCESSFUL','PARTIALLY_REFUNDED') and b.created_at > now() - interval '30 days')::bigint as commission_30d,
       (select count(*) from refunds where status = 'FAILED')::int as failed_refunds,

@@ -116,18 +116,43 @@ export function toHHMM(min: number) {
   return `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
 }
 
+const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const WD_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WD_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+type DateOpts = { weekday?: "short" | "long" | undefined; day?: "numeric" | undefined; month?: "short" | "long" | undefined; year?: "numeric" | undefined };
+
+/**
+ * Deterministic date formatting (no Intl locale data), so server-rendered
+ * and hydrated output always match regardless of ICU version.
+ * Output style (en-IN): "Fri, 2 Oct 2026" / "Friday, 2 October 2026".
+ */
+function composeDate(p: { year: number; month: number; day: number; weekday: number }, o: DateOpts) {
+  const opts: DateOpts = { weekday: "short", day: "numeric", month: "short", year: undefined, ...o };
+  const parts: string[] = [];
+  if (opts.day) parts.push(String(p.day));
+  if (opts.month) parts.push(opts.month === "long" ? MONTH_LONG[p.month - 1]! : MONTH_SHORT[p.month - 1]!);
+  if (opts.year) parts.push(String(p.year));
+  const body = parts.join(" ");
+  if (!opts.weekday) return body;
+  const wd = opts.weekday === "long" ? WD_LONG[p.weekday]! : WD_SHORT[p.weekday]!;
+  return body ? `${wd}, ${body}` : wd;
+}
+
 export function formatTime(date: Date | string, tz: string = DEFAULT_TZ) {
-  return new Intl.DateTimeFormat("en-IN", { timeZone: tz, hour: "numeric", minute: "2-digit", hour12: true }).format(new Date(date));
+  const p = zonedParts(new Date(date), tz);
+  const h12 = p.hour % 12 === 0 ? 12 : p.hour % 12;
+  return `${h12}:${String(p.minute).padStart(2, "0")} ${p.hour >= 12 ? "pm" : "am"}`;
 }
 
-export function formatDate(date: Date | string, tz: string = DEFAULT_TZ, opts: Intl.DateTimeFormatOptions = {}) {
-  return new Intl.DateTimeFormat("en-IN", { timeZone: tz, weekday: "short", day: "numeric", month: "short", ...opts }).format(new Date(date));
+export function formatDate(date: Date | string, tz: string = DEFAULT_TZ, opts: DateOpts = {}) {
+  return composeDate(zonedParts(new Date(date), tz), opts);
 }
 
-export function formatDateKey(dateKey: string, opts: Intl.DateTimeFormatOptions = {}) {
-  return new Intl.DateTimeFormat("en-IN", { timeZone: "UTC", weekday: "short", day: "numeric", month: "short", ...opts }).format(
-    new Date(`${dateKey}T00:00:00Z`),
-  );
+export function formatDateKey(dateKey: string, opts: DateOpts = {}) {
+  const [y, m, d] = dateKey.split("-").map(Number) as [number, number, number];
+  return composeDate({ year: y, month: m, day: d, weekday: weekdayOf(dateKey) }, opts);
 }
 
 export const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;

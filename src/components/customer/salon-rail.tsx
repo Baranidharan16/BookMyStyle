@@ -6,14 +6,14 @@ import { api, qs } from "@/lib/api-client";
 import type { SalonCard as SalonCardT } from "@/server/domain/salons";
 import { useUserLocation } from "../location-context";
 import { SalonCard, SalonCardSkeleton } from "./salon-card";
-import { toDateKey } from "@/lib/time";
+import { minutesOfDay, toDateKey } from "@/lib/time";
 
 /** Horizontal rail of salons fetched for the viewer's location (client-side, live). */
 export function SalonRail({ title, subtitle, mode, signedIn }: { title: string; subtitle?: string; mode: "nearby" | "available-now"; signedIn: boolean }) {
   const { location } = useUserLocation();
   const now = new Date();
-  const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  let minute = Math.ceil((ist.getHours() * 60 + ist.getMinutes() + 45) / 15) * 15;
+  const nowMin = minutesOfDay(now, "Asia/Kolkata");
+  let minute = Math.ceil((nowMin + 45) / 15) * 15;
   if (minute > 20 * 60 + 30) minute = 20 * 60 + 30;
   const time = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
   const params = mode === "nearby" ? { lat: location.lat, lng: location.lng, sort: "distance", maxDistanceKm: 25, pageSize: 10 } : { lat: location.lat, lng: location.lng, date: toDateKey(now), time, maxDistanceKm: 25, pageSize: 10 };

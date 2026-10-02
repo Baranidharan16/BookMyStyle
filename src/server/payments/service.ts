@@ -9,6 +9,7 @@ import { Errors, PG, pgCode } from "../http/errors";
 import { notify } from "../notifications";
 import { activeProviderName, getPaymentProvider, webhookSignatureHeader } from "./index";
 import type { ProviderName } from "./types";
+import { formatTime } from "@/lib/time";
 
 /**
  * Payment flow:  create order  →  provider checkout  →  verify signature +
@@ -94,7 +95,7 @@ export async function markPaymentFailed(orderId: string, reason: string, provide
       category: "PAYMENT",
       type: "payment.failed",
       title: "Payment failed",
-      body: `${reason} Your slot is held until ${b.lockExpiresAt?.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit" }) ?? "shortly"} — you can retry.`,
+      body: `${reason} Your slot is held until ${b.lockExpiresAt ? formatTime(b.lockExpiresAt) : "shortly"} — you can retry.`,
       link: `/checkout/${b.id}`,
     });
   }

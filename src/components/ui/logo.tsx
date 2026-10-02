@@ -4,13 +4,8 @@ import { cn } from "@/lib/utils";
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={cn("h-8 w-8", className)} aria-hidden="true">
-      <defs>
-        <linearGradient id="bms-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#c2316a" />
-          <stop offset="1" stopColor="#6e1638" />
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="16" fill="url(#bms-g)" />
+      <rect width="64" height="64" rx="16" fill="#8f1d46" />
+      <path d="M0 16C0 7.2 7.2 0 16 0h32c8.8 0 16 7.2 16 16v6C44 30 22 18 0 34V16Z" fill="#c2316a" opacity="0.75" />
       <path
         d="M22 16h12.5c6.4 0 10.5 3.3 10.5 8.6 0 3.4-1.8 5.9-4.7 7 3.8 1 6.2 3.9 6.2 7.9 0 6-4.6 9.5-11.6 9.5H22V16Zm7 13.2h4.6c2.6 0 4.1-1.2 4.1-3.3s-1.5-3.2-4.1-3.2H29v6.5Zm0 13.1h5.4c2.9 0 4.6-1.3 4.6-3.6s-1.7-3.6-4.6-3.6H29v7.2Z"
         fill="#fff"

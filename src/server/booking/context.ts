@@ -221,7 +221,7 @@ export type ServiceSelection = {
 };
 
 /** Load a service + the customer's chosen options, validating option rules. */
-export async function loadServiceSelection(ex: Executor, salonId: string, serviceId: string, optionIds: string[] = []): Promise<ServiceSelection> {
+export async function loadServiceSelection(ex: Executor, salonId: string, serviceId: string, optionIds: string[] = [], rules: { enforceRequired?: boolean } = {}): Promise<ServiceSelection> {
   const service = await ex.query.services.findFirst({ where: and(eq(services.id, serviceId), eq(services.salonId, salonId)) });
   if (!service) throw Errors.notFound("Service");
   if (!service.active) throw Errors.conflict("SERVICE_INACTIVE", "This service is currently unavailable at this salon.");
@@ -246,7 +246,7 @@ export async function loadServiceSelection(ex: Executor, salonId: string, servic
   });
   for (const g of groups) {
     const n = chosen.filter((o) => o.groupId === g.id).length;
-    if (g.required && n === 0) throw Errors.validation(`Please choose an option for "${g.name}".`);
+    if (g.required && n === 0 && rules.enforceRequired !== false) throw Errors.validation(`Please choose an option for "${g.name}".`);
     if (!g.multiSelect && n > 1) throw Errors.validation(`Only one option can be selected for "${g.name}".`);
   }
 

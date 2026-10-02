@@ -9,7 +9,7 @@ import { SalonCard } from "@/components/customer/salon-card";
 import { EmptyState } from "@/components/ui/states";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/card";
-import { toDateKey } from "@/lib/time";
+import { minutesOfDay, toDateKey } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Favourites" };
 
@@ -17,8 +17,8 @@ export default async function FavoritesPage() {
   const user = await requirePageUser(["CUSTOMER"]);
   const ids = (await db.select({ id: favorites.salonId }).from(favorites).where(eq(favorites.userId, user.id))).map((r) => r.id);
   const now = new Date();
-  const ist = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
-  const minute = Math.min(20 * 60 + 30, Math.ceil((ist.getHours() * 60 + ist.getMinutes() + 60) / 15) * 15);
+  const nowMin = minutesOfDay(now, "Asia/Kolkata");
+  const minute = Math.min(20 * 60 + 30, Math.ceil((nowMin + 60) / 15) * 15);
   const time = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
   const res = ids.length ? await searchSalons({ ids, pageSize: 30 }) : { items: [] };
   // "Upcoming availability" for each favourite (next hour today)

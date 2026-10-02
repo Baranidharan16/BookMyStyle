@@ -201,7 +201,7 @@ function DayGrid({ data, date, axis, dragId, setDragId, onOpen, onMove, canMove 
                         onDragStart={(ev) => { setDragId(b.id); ev.dataTransfer.setData("offset", String(ev.clientY - (ev.currentTarget as HTMLElement).getBoundingClientRect().top)); }}
                         onDragEnd={() => setDragId(null)}
                         onClick={() => onOpen(b.id)}
-                        className={cn("absolute inset-x-1 overflow-hidden rounded-lg border px-1.5 py-1 text-left text-[11px] leading-tight shadow-sm transition hover:z-10 hover:shadow-md", COLOR[b.status] ?? COLOR.CONFIRMED, dragId === b.id && "opacity-50", movable && "cursor-grab active:cursor-grabbing")}
+                        className={cn("absolute inset-x-1 flex flex-col items-start justify-start overflow-hidden rounded-lg border px-1.5 py-1 text-left text-[11px] leading-tight shadow-sm transition hover:z-10 hover:shadow-md", COLOR[b.status] ?? COLOR.CONFIRMED, dragId === b.id && "opacity-50", movable && "cursor-grab active:cursor-grabbing")}
                         style={{ top: y(s), height: Math.max(22, (e - s) * PX - 2) }}
                         title={`${b.customerName} · ${b.serviceName}`}
                       >

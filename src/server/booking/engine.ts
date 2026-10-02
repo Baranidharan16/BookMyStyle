@@ -759,7 +759,8 @@ export async function createDeskBooking(user: SessionUser, salonId: string, inpu
     return await db.transaction(async (tx) => {
       await lockSalon(tx, salonId);
       await expireHolds(tx, salonId);
-      const sel = await loadServiceSelection(tx, salonId, input.serviceId, input.optionIds ?? []);
+      // At the desk, staff set duration/price directly — required online options don't apply.
+      const sel = await loadServiceSelection(tx, salonId, input.serviceId, input.optionIds ?? [], { enforceRequired: false });
       const spec: ServiceSpec = { ...sel.spec, durationMinutes: input.durationMinutes ?? sel.spec.durationMinutes };
       const { tz } = await salonTz(tx, salonId);
       const start = input.startsAt ? new Date(input.startsAt) : new Date(Math.ceil(Date.now() / 60_000) * 60_000);

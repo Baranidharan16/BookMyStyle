@@ -25,7 +25,7 @@ export default function AdminSalons() {
     <>
       <PageHeader title="Salons" description="Verify new salons, suspend bad actors and configure plans, featured listings and commission." />
       <div className="mb-4 flex flex-wrap gap-2">
-        <Segmented size="sm" value={status} onChange={setStatus} options={[{ value: "", label: "All" }, { value: "PENDING", label: "Pending" }, { value: "UNDER_REVIEW", label: "Under review" }, { value: "APPROVED", label: "Approved" }, { value: "REJECTED", label: "Rejected" }, { value: "SUSPENDED", label: "Suspended" }, { value: "DRAFT", label: "Draft" }]} />
+        <div className="no-scrollbar max-w-full overflow-x-auto"><Segmented size="sm" value={status} onChange={setStatus} options={[{ value: "", label: "All" }, { value: "PENDING", label: "Pending" }, { value: "UNDER_REVIEW", label: "Under review" }, { value: "APPROVED", label: "Approved" }, { value: "REJECTED", label: "Rejected" }, { value: "SUSPENDED", label: "Suspended" }, { value: "DRAFT", label: "Draft" }]} /></div>
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search salon" className="h-9 w-56" aria-label="Search salons" />
       </div>
       {isLoading ? <Skeleton className="h-64" /> : (

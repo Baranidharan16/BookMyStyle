@@ -193,3 +193,18 @@ describe("lifecycle: cancel, reschedule, late arrival, no-show", () => {
     expect(await errCode(transitionBooking(fx.owner, b!.id, "START"))).toBe("INVALID_TRANSITION");
   });
 });
+
+describe("service options", () => {
+  it("online bookings must pick required options; desk bookings don't (staff set price/duration)", async () => {
+    const fx = await makeSalon({ chairs: 2 });
+    const [g] = await db.insert(s.serviceOptionGroups).values({ serviceId: fx.service.id, name: "Hair length", required: true }).returning();
+    const [long] = await db.insert(s.serviceOptions).values([{ groupId: g!.id, name: "Long", priceDelta: 10000, durationDelta: 15 }]).returning();
+    const c = await makeUser("CUSTOMER");
+    expect(await errCode(holdSlot(c, { salonId: fx.salon.id, serviceId: fx.service.id, optionIds: [], date: futureDate(), startMinute: H(12) }))).toBe("VALIDATION");
+    const b = await holdSlot(c, { salonId: fx.salon.id, serviceId: fx.service.id, optionIds: [long!.id], date: futureDate(), startMinute: H(12) });
+    expect(b!.durationMinutes).toBe(45); // 30 + 15 option minutes
+    expect(b!.subtotal).toBe(35000);
+    const desk = await createDeskBooking(fx.owner, fx.salon.id, { source: "OWNER", customerName: "Phone guest", serviceId: fx.service.id, startsAt: zonedToUtc(futureDate(), H(15), TZ).toISOString(), paymentMode: "PAY_AT_SALON", paymentCollected: false });
+    expect(desk!.status).toBe("CONFIRMED");
+  });
+});

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 export type RealtimeMessage = { ch: string; type: string; data?: Record<string, unknown> };
 
@@ -9,8 +9,7 @@ export type RealtimeMessage = { ch: string; type: string; data?: Record<string, 
  * refetch availability/board/status instead of polling.
  */
 export function useRealtime(channels: (string | null | undefined)[], onMessage: (m: RealtimeMessage) => void) {
-  const handler = useRef(onMessage);
-  handler.current = onMessage;
+  const handle = useEffectEvent((m: RealtimeMessage) => onMessage(m));
   const [connected, setConnected] = useState(false);
   const key = channels.filter(Boolean).join(",");
 
@@ -20,7 +19,7 @@ export function useRealtime(channels: (string | null | undefined)[], onMessage: 
     es.addEventListener("ready", () => setConnected(true));
     es.addEventListener("message", (e) => {
       try {
-        handler.current(JSON.parse((e as MessageEvent).data));
+        handle(JSON.parse((e as MessageEvent).data));
       } catch {
         /* ignore */
       }

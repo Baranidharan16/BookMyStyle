@@ -203,7 +203,7 @@ export function BookingWizard({
       {!salon.bookable && <p className="mt-2 rounded-xl bg-warning-soft p-3 text-sm text-warning">This salon is awaiting verification and can&apos;t accept bookings yet.</p>}
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-8">
+        <div className="min-w-0 space-y-8">
           {/* 1. service */}
           <section aria-labelledby="s1">
             <h2 id="s1" className="mb-3 flex items-center gap-2 text-lg font-bold"><Step n={1} /> Choose a service</h2>

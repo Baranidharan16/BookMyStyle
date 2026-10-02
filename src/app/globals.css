@@ -144,3 +144,9 @@ body {
 }
 
 .leaflet-container { font-family: var(--font-sans); background: var(--surface-2); }
+
+/* Grid items default to min-width:auto, which lets horizontal scrollers
+   (date strips, chip rows) stretch their column past the viewport. */
+@layer base {
+  .grid > * { min-width: 0; }
+}

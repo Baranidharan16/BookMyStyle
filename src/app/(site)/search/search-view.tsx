@@ -144,7 +144,7 @@ export function SearchView({ signedIn, categories }: { signedIn: boolean; catego
                 {dateLabel && <> · that can serve you around <strong className="text-ink">{dateLabel}</strong></>}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button variant="secondary" size="sm" className="lg:hidden" onClick={() => setFiltersOpen(true)}>
                 <SlidersHorizontal className="h-4 w-4" /> Filters{activeFilters.length ? ` (${activeFilters.length})` : ""}
               </Button>

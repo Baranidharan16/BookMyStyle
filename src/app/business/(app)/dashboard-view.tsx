@@ -6,7 +6,9 @@ import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api } from "@/lib/api-client";
 import { formatINR } from "@/lib/utils";
-import { formatDateKey, formatTime } from "@/lib/time";
+import { formatDateKey, formatTime, minutesOfDay } from "@/lib/time";
+
+const greeting = (m: number) => (m < 720 ? "morning" : m < 1020 ? "afternoon" : "evening");
 import { useBiz } from "@/components/business/business-context";
 import { useSalonLive } from "@/hooks/use-salon-live";
 import { Card, CardBody, CardHeader, PageHeader, Stat } from "@/components/ui/card";
@@ -31,7 +33,7 @@ export function BusinessDashboard() {
 
   return (
     <>
-      <PageHeader eyebrow={o ? formatDateKey(o.date, { weekday: "long", month: "long" }) : "Today"} title={`Good ${new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}`} description={<span className="inline-flex items-center gap-2">{biz.salonName} {connected && <LiveDot />}</span>} actions={<><ButtonLink href="/business/walk-in"><UserPlus className="h-4 w-4" /> Add walk-in</ButtonLink><ButtonLink href="/business/board" variant="secondary">Open live board</ButtonLink></>} />
+      <PageHeader eyebrow={o ? formatDateKey(o.date, { weekday: "long", month: "long" }) : "Today"} title={`Good ${greeting(minutesOfDay(new Date(), biz.timezone))}`} description={<span className="inline-flex items-center gap-2">{biz.salonName} {connected && <LiveDot />}</span>} actions={<><ButtonLink href="/business/walk-in"><UserPlus className="h-4 w-4" /> Add walk-in</ButtonLink><ButtonLink href="/business/board" variant="secondary">Open live board</ButtonLink></>} />
       {!o ? (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <Skeleton key={i} className="h-24" />)}</div>
       ) : (

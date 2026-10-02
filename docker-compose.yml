@@ -1,0 +1,31 @@
+# Local production-like stack: PostgreSQL 16 + BookMyStyle.
+#   docker compose up --build
+#   docker compose exec app node -e "" # (seed from host with `npm run db:seed` pointing at localhost:5433)
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bms
+      POSTGRES_PASSWORD: bms_dev_password
+      POSTGRES_DB: bookmystyle
+    ports: ["5433:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bms"]
+      interval: 5s
+      retries: 10
+  app:
+    build: .
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: postgres://bms:bms_dev_password@db:5432/bookmystyle
+      APP_URL: http://localhost:3000
+      PAYMENT_PROVIDER: sandbox
+      ALLOW_SANDBOX_PAYMENTS: "true" # demo only — use Razorpay keys for real deployments
+      SANDBOX_KEY_SECRET: change-me
+      SANDBOX_WEBHOOK_SECRET: change-me-too
+      RUN_SWEEPER: "true"
+volumes:
+  pgdata:

@@ -27,7 +27,7 @@ export function RatingPill({ value, count, className }: { value: number; count?:
         {value > 0 ? value.toFixed(1) : "New"}
         {value > 0 && <Star className="h-3 w-3 fill-current" aria-hidden />}
       </span>
-      {count != null && count > 0 && <span className="text-xs text-muted">({count.toLocaleString("en-IN")})</span>}
+      {count != null && count > 0 && <span className="text-xs text-muted">({count})</span>}
     </span>
   );
 }
